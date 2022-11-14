@@ -18,7 +18,6 @@
 
 #include "base/kaldi-utils.h"
 
-#include <cctype>
 #include <chrono>
 #include <cstdio>
 #include <thread>

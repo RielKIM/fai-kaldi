@@ -31,11 +31,15 @@ void OnlineTimingStats::Print(bool online){
     double real_time_factor = total_time_taken_ / total_audio_,
         average_wait = (total_time_taken_ - total_audio_) / num_utts_,
         idle_proportion = total_time_waited_ / total_audio_,
+	offline_rtf = (total_time_taken_ - total_time_waited_)/total_audio_,
         idle_percent = 100.0 * idle_proportion;
 
     KALDI_LOG << "Timing stats: real-time factor was " << real_time_factor
               << " (note: this cannot be less than one.)";
+    KALDI_LOG << "Offline RTF was " << offline_rtf << " seconds.";
     KALDI_LOG << "Average delay was " << average_wait << " seconds.";
+    KALDI_LOG << "Total processing time was " << (total_time_taken_ - total_time_waited_) << " seconds.";
+
     if (idle_percent != 0.0) {
       // If the user was calling SleepUntil instead of WaitUntil, this will
       // always be zero; so don't print it in that case.

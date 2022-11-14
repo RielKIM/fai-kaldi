@@ -131,6 +131,57 @@ bool WriteScriptFile(const std::string &wxfilename,
 }
 
 
+bool WriteScriptFile(std::ostream &os,
+                     const std::vector<std::pair<std::string, std::string> >
+                     &script, std::string delim) {
+  if (!os.good()) {
+    KALDI_WARN << "WriteScriptFile: attempting to write to invalid stream.";
+    return false;
+  }
+  std::vector<std::pair<std::string, std::string> >::const_iterator iter;
+  for (iter = script.begin(); iter != script.end(); ++iter) {
+    if (!IsToken(iter->first)) {
+      KALDI_WARN << "WriteScriptFile: using invalid token \"" << iter->first <<
+                    '"';
+      return false;
+    }
+    if (iter->second.find('\n') != std::string::npos ||
+       (iter->second.length() != 0 &&
+        (isspace(iter->second[0]) ||
+         isspace(iter->second[iter->second.length()-1])))) {
+      // second part contains newline or leading or trailing space.
+      KALDI_WARN << "WriteScriptFile: attempting to write invalid line \"" <<
+                    iter->second << '"';
+      return false;
+    }
+    os << iter->first << delim.c_str() << iter->second << '\n';
+  }
+  if (!os.good()) {
+    KALDI_WARN << "WriteScriptFile: stream in error state.";
+    return false;
+  }
+  return true;
+}
+
+bool WriteScriptFile(const std::string &wxfilename,
+                     const std::vector<std::pair<std::string, std::string> >
+                     &script, std::string delim) {
+  Output output;
+  if (!output.Open(wxfilename, false, false)) {  // false, false means not
+    // binary, no binary-mode header.
+    KALDI_ERR << "Error opening output stream for script file: "
+              << PrintableWxfilename(wxfilename);
+    return false;
+  }
+  if (!WriteScriptFile(output.Stream(), script, delim)) {
+    KALDI_ERR << "Error writing script file to stream "
+              << PrintableWxfilename(wxfilename);
+    return false;
+  }
+  return true;
+}
+
+
 
 WspecifierType ClassifyWspecifier(const std::string &wspecifier,
                                   std::string *archive_wxfilename,

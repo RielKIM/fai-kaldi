@@ -142,12 +142,15 @@ def get_exe_additional_depends(t):
         # solve kwsbin
         "generate-proxy-keywords": ["fstext"],
         "transcripts-to-fsts": ["fstext"],
+
+        #solve faidecoderbin - KYW
+        "online-decoder": ["faidecoder"]
     }
-    libs = []
+    l = []
     for pattern in additional.keys():
         if fnmatch.fnmatch(t, pattern):
-            libs.extend(list(map(lambda name: lib_dir_name_to_lib_target(name), additional[pattern])))
-    return sorted(list(set(libs)))
+            l.extend(list(map(lambda name: lib_dir_name_to_lib_target(name), additional[pattern])))
+    return sorted(list(set(l)))
 
 def disable_for_win32(t):
     disabled = [
@@ -185,16 +188,19 @@ class CMakeListsHeaderLibrary(object):
                 ret.append("    " + f)
             ret.append(")\n")
 
+
+
         ret.append("add_library(" + self.target_name + " INTERFACE)")
         ret.append("target_include_directories(" + self.target_name + " INTERFACE ")
         ret.append("    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>")
         ret.append("    $<INSTALL_INTERFACE:include/kaldi>")
+        ret.append("    ${CMAKE_CURRENT_SOURCE_DIR}/..>")
         ret.append(")\n")
 
         ret.append("""
 install(TARGETS {tgt} EXPORT kaldi-targets)
 
-install(FILES ${{PUBLIC_HEADERS}} DESTINATION include/kaldi/{dir} COMPONENT kaldi)
+install(FILES ${{PUBLIC_HEADERS}} DESTINATION include/kaldi/{dir})
 """.format(tgt=self.target_name, dir=self.dir_name))
 
         return "\n".join(ret)
@@ -233,8 +239,8 @@ class CMakeListsLibrary(object):
                 return
             libs = makefile.split("ADDLIBS")[-1].split("\n\n")[0]
             libs = re.findall("[^\s\\\\=]+", libs)
-            for lib in libs:
-                self.depends.append(os.path.splitext(os.path.basename(lib))[0])
+            for l in libs:
+                self.depends.append(os.path.splitext(os.path.basename(l))[0])
 
     def gen_code(self):
         ret = []
@@ -249,7 +255,7 @@ class CMakeListsLibrary(object):
             self.source_list.append("${CUDA_OBJS}")
             ret.append("if(CUDA_FOUND)")
             ret.append("    cuda_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/..)")
-            ret.append("    cuda_compile(CUDA_OBJS SHARED")
+            ret.append("    cuda_compile(CUDA_OBJS")
             for f in self.cuda_source_list:
                 ret.append("        " + f)
             ret.append("    )")
@@ -265,6 +271,7 @@ class CMakeListsLibrary(object):
         ret.append("target_include_directories(" + self.target_name + " PUBLIC ")
         ret.append("     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>")
         ret.append("     $<INSTALL_INTERFACE:include/kaldi>")
+        ret.append("     ${CMAKE_CURRENT_SOURCE_DIR}/../../tools/openfst-1.7.2/include")
         ret.append(")\n")
 
         if len(self.depends) > 0:
@@ -296,7 +303,7 @@ install(TARGETS {tgt}
     LIBRARY DESTINATION ${{CMAKE_INSTALL_LIBDIR}} COMPONENT kaldi
     RUNTIME DESTINATION ${{CMAKE_INSTALL_BINDIR}} COMPONENT kaldi
 )
-install(FILES ${{PUBLIC_HEADERS}} DESTINATION include/kaldi/{dir} COMPONENT kaldi)
+install(FILES ${{PUBLIC_HEADERS}} DESTINATION include/kaldi/{dir})
 """.format(tgt=self.target_name, dir=self.dir_name))
 
         return "\n".join(ret)

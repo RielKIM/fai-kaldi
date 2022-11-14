@@ -106,8 +106,7 @@ void ParseOptions::RegisterCommon(const std::string &name, T *ptr,
   NormalizeArgName(&idx);
   if (doc_map_.find(idx) != doc_map_.end())
     KALDI_WARN << "Registering option twice, ignoring second time: " << name;
-  else
-    this->RegisterSpecific(name, idx, ptr, doc, is_standard);
+  this->RegisterSpecific(name, idx, ptr, doc, is_standard);
 }
 
 // used to register standard parameters (those that are present in all of the

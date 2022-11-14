@@ -161,6 +161,16 @@ bool WriteScriptFile(std::ostream &os,
                      const std::vector<std::pair<std::string, std::string> >
                      &script);
 
+
+bool WriteScriptFile(const std::string &wxfilename,
+                     const std::vector<std::pair<std::string, std::string> >
+                     &script, std::string delim);
+
+// This version writes to an ostream.
+bool WriteScriptFile(std::ostream &os,
+                     const std::vector<std::pair<std::string, std::string> >
+                     &script, std::string delim);
+
 // Documentation for "rspecifier"
 // "rspecifier" describes how we read a set of objects indexed by keys.
 // The possibilities are:

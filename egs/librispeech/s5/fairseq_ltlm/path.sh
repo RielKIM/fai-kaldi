@@ -10,5 +10,4 @@ if [ -z $c ] ; then
 		source fairseq_ltlm/anaconda/bin/activate
 		set -- "${current_args[@]}"
 fi
-export PYTHONUNBUFFERED=1
 
